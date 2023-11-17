@@ -98,7 +98,7 @@ func Test1() {
 
 func CardPositions() {
 	// Send Card
-	// k720.SendCmd(comHandle, macAddr, "DC")
+	k720.SendCmd(comHandle, macAddr, "DC")
 	// Recycle
 	// k720.SendCmd(comHandle, macAddr, "CP")
 
@@ -111,7 +111,7 @@ func CardPositions() {
 	// Card Read Position
 	// k720.SendCmd(comHandle, macAddr, "FC7")
 	// FrontEnterCard
-	k720.SendCmd(comHandle, macAddr, "FC8")
+	// k720.SendCmd(comHandle, macAddr, "FC8")
 
 	sensorQuery, err := k720.SensorQuery(comHandle, macAddr)
 	if err == nil {
@@ -128,7 +128,7 @@ func Operate() {
 		for {
 			sensorQuery, _ := k720.SensorQuery(comHandle, macAddr)
 			state := k720.CalculateState(sensorQuery)
-			if state&k720.CARD_AT_SENSOR_1_POSITION > 0 {
+			if state&k720.CARD_AT_SENSOR_1_POSITION.Code > 0 {
 				break
 			}
 			// FrontEnterCard
@@ -142,8 +142,41 @@ func Operate() {
 			k720.PrintPacket("Card ID: ", cardId)
 		}
 
-		//  Take Card Position
-		k720.SendCmd(comHandle, macAddr, "FC4")
+		// Take Card Position
+		// k720.SendCmd(comHandle, macAddr, "FC4")
+		// Send Card
+		k720.SendCmd(comHandle, macAddr, "DC")
+	}
+}
+
+func printState() {
+	sensorQuery, _ := k720.SensorQuery(comHandle, macAddr)
+	state := k720.CalculateState(sensorQuery)
+	if state != 0 {
+		fmt.Println("---------------------------")
+		k720.PrintState(state)
+		fmt.Println("---------------------------")
+	}
+}
+
+func ReadAllCards() {
+	// Reset
+	k720.SendCmd(comHandle, macAddr, "RS")
+	printState()
+	for {
+		// Card Read Position
+		k720.SendCmd(comHandle, macAddr, "FC7")
+		printState()
+
+		data, err := k720.S50GetCardId(comHandle, macAddr)
+		if (err == nil) && (data[0] == byte('P')) {
+			cardId := data[3:]
+			k720.PrintPacket("Card ID: ", cardId)
+		}
+
+		// Outside Position
+		k720.SendCmd(comHandle, macAddr, "FC0")
+		printState()
 	}
 }
 
@@ -153,6 +186,7 @@ func main() {
 	comHandle, _ = k720.CommOpen(port)
 	// Test1()
 	// CardPositions()
-	Operate()
+	// Operate()
+	ReadAllCards()
 	k720.CommClose(comHandle)
 }

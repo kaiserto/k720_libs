@@ -29,11 +29,36 @@ const (
 
 var LOG_LEVEL int = LOG_NONE
 
-const (
-	CARD_AT_SENSOR_1_POSITION int = 0x0001
-	CARD_AT_SENSOR_2_POSITION int = 0x0002
-	CARD_AT_SENSOR_3_POSITION int = 0x0004
+type State struct {
+	Code        int
+	Description string
+}
+
+var (
+	CARD_AT_SENSOR_1_POSITION  State = registerState(0x0001, "Card at sensor 1 position")
+	CARD_AT_SENSOR_2_POSITION  State = registerState(0x0002, "Card at sensor 2 position")
+	CARD_AT_SENSOR_3_POSITION  State = registerState(0x0004, "Card at sensor 3 position")
+	CARD_EMPTY                 State = registerState(0x0008, "Card empty")
+	CARD_PRE_EMPTY             State = registerState(0x0010, "Card pre-empty")
+	CARD_JAM                   State = registerState(0x0020, "Card jam")
+	CARD_OVERLAP               State = registerState(0x0040, "Card overlap")
+	CARD_HOPPER_FULL           State = registerState(0x0080, "Card hopper full")
+	ERROR_OF_RECYCLING_CARD    State = registerState(0x0100, "Error of recycling card")
+	ERROR_OF_ISSUING_CARD      State = registerState(0x0200, "Error of issuing card")
+	COLLECTING_CARD            State = registerState(0x0400, "Collecting card")
+	SENDING_CARD               State = registerState(0x0800, "Sending card")
+	PREPARING_CARD             State = registerState(0x1000, "Preparing card")
+	PREPARE_CARD_FAILURE       State = registerState(0x2000, "Prepare card failure")
+	COULD_NOT_IMPLEMNT_COMMAND State = registerState(0x4000, "Could not implement command")
+	RECYCLING_BOX_FULL         State = registerState(0x8000, "Recycling box fulls")
 )
+var states []State = make([]State, 0)
+
+func registerState(code int, description string) State {
+	state := State{code, description}
+	states = append(states, state)
+	return state
+}
 
 const (
 	KEYA byte = 0x30
@@ -341,6 +366,14 @@ func CalculateState(query []byte) int {
 	return state
 }
 
+func PrintState(state int) {
+	for _, s := range states {
+		if state&s.Code > 0 {
+			fmt.Println(s.Description)
+		}
+	}
+}
+
 func CommOpen(port string) (serial.Port, error) {
 	mode := &serial.Mode{
 		BaudRate: 9600,
@@ -439,7 +472,7 @@ func S50LoadSecKey(comHandle serial.Port, macAddr byte, sectorAddr byte, keyType
 	command := "\x3b\x32" +
 		string(sectorAddr) +
 		string(keyType) +
-		string(key[:])
+		string(key)
 	packet, err := sendPacket(comHandle, macAddr, command)
 	if err != nil {
 		return nil, err
