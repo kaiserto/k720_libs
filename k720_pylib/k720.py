@@ -43,7 +43,7 @@ def _calculate_bcc(packet):
     return xorsum
 
 def _create_packet(mac_addr, data):
-    # type: (int, list) -> list | None
+    # type: (int, str) -> list | None
     packet = [] 
     selen = len(data)
     if mac_addr < 0 or mac_addr > 15:
@@ -87,8 +87,8 @@ def _create_enquiry_packet(mac_addr):
     packet.append(ENQ)
 
     # address
-    addr_h = ord('0') + mac_addr // 10
-    addr_l = ord('0') + mac_addr % 10
+    addr_h = ord('0') + (mac_addr // 10)
+    addr_l = ord('0') + (mac_addr % 10)
     packet.append(addr_h)
     packet.append(addr_l)
 
@@ -110,7 +110,7 @@ def _read_ack(com_handle, mac_addr):
     return True
 
 def _send_packet(com_handle, mac_addr, command):
-    # type: (object, int, list) -> list | None
+    # type: (object, int, str) -> list | None
     packet = _create_packet(mac_addr, command)
     if packet == None:
         return None
@@ -251,11 +251,14 @@ def comm_close(com_handle):
 
 # Get Version (GV)
 def get_sys_version(com_handle, mac_addr):
-    # type: (object, int) -> list | None
+    # type: (object, int) -> str | None
     packet = _send_packet(com_handle, mac_addr, 'GV')
     if packet == None:
         return None
-    return _get_packet_data(packet)
+    data = _get_packet_data(packet)
+    if data == None:
+        return None
+    return bytes(data).decode()
 
 # Check Sensor (RF)
 def query(com_handle, mac_addr):

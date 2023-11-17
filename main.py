@@ -7,7 +7,7 @@ k720.LOG_LEVEL = k720.LOG_NONE
 mac_addr = 0x0f
 port = '/dev/ttyS0'
 
-def main():
+def test1():
     # Reset
     # k720.send_cmd(com_handle, mac_addr, 'RS')
 
@@ -18,7 +18,7 @@ def main():
 
     version = k720.get_sys_version(com_handle, mac_addr)
     if version != None:
-        print(bytes(version).decode())
+        print(version)
 
     query = k720.query(com_handle, mac_addr)
     if query != None:
@@ -136,7 +136,7 @@ def operate():
 
 if __name__ == '__main__':
     com_handle = k720.comm_open(port)
-    # main()
+    # test1()
     # card_positions()
     operate()
     k720.comm_close(com_handle)
