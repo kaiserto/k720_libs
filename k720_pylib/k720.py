@@ -105,7 +105,7 @@ def _read_ack(com_handle, mac_addr):
 
     b_addr = com_handle.read(size=2)
     _log_trace("Received address:", b_addr.decode())
-    if b_addr.decode() != str(mac_addr):
+    if int(b_addr.decode()) != mac_addr:
         return False
     return True
 
@@ -148,7 +148,7 @@ def _receive_packet(com_handle, mac_addr):
     _log_trace("bADDR:" + str(bytes(b_addr)))
     if len(b_addr) != 2:
         return None
-    if b_addr.decode() != str(mac_addr):
+    if int(b_addr.decode()) != mac_addr:
         return None
     packet.append(b_addr[0])
     packet.append(b_addr[1])

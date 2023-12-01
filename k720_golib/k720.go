@@ -206,7 +206,8 @@ func readAck(comHandle serial.Port, macAddr byte) error {
 		return errors.New("error #3 in readAck")
 	}
 	logTrace("Received address:", string(arrAddr))
-	if string(arrAddr) != strconv.Itoa(int(macAddr)) {
+	intAddr, _ := strconv.Atoi(string(arrAddr))
+	if intAddr != int(macAddr) {
 		return errors.New("error #4 in readAck")
 	}
 	return nil
@@ -267,7 +268,8 @@ func receivePacket(comHandle serial.Port, macAddr byte) ([]byte, error) {
 	if n != 2 {
 		return nil, errors.New("error #3 in receivePacket")
 	}
-	if string(arrAddr) != strconv.Itoa(int(macAddr)) {
+	intAddr, _ := strconv.Atoi(string(arrAddr))
+	if intAddr != int(macAddr) {
 		return nil, errors.New("error #4 in receivePacket")
 	}
 	packet = append(packet, arrAddr[0])
